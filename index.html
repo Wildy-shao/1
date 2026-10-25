@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>新能源汽车英语 · 单词消消乐</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: linear-gradient(160deg, #e8f4fd 0%, #f0eaff 100%);
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100%; padding: 12px;
+    user-select: none; -webkit-user-select: none;
+  }
+  header { text-align: center; margin-bottom: 10px; }
+  header h1 {
+    font-size: 22px; color: #1a3c6e; letter-spacing: 1px;
+  }
+  header p { font-size: 12px; color: #6b7a90; margin-top: 2px; }
+  .hud {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .hud .chip {
+    background: #fff; border-radius: 20px; padding: 6px 14px;
+    font-size: 14px; color: #1a3c6e; font-weight: 600;
+    box-shadow: 0 2px 6px rgba(26,60,110,.10);
+  }
+  .hud .chip span { color: #0a7cff; }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%; max-width: 420px;
+  }
+  .tile {
+    background: #fff; border-radius: 14px;
+    min-height: 84px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 6px; text-align: center;
+    box-shadow: 0 3px 8px rgba(26,60,110,.12);
+    cursor: pointer; transition: transform .15s, box-shadow .15s, opacity .3s;
+    border: 2px solid transparent;
+    position: relative; overflow: hidden;
+  }
+  .tile .en { font-size: 16px; font-weight: 700; color: #1a3c6e; line-height: 1.25; word-break: break-word; }
+  .tile .zh { font-size: 13px; color: #4a5a70; line-height: 1.35; margin-top: 2px; }
+  .tile.en-tile { background: linear-gradient(150deg, #ffffff, #eaf3ff); }
+  .tile.zh-tile { background: linear-gradient(150deg, #ffffff, #f3edff); }
+  .tile .tag {
+    position: absolute; top: 5px; left: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  }
+  .en-tile .tag { color: #0a7cff; }
+  .zh-tile .tag { color: #8a5cf6; }
+  .tile.selected {
+    border-color: #0a7cff; transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(10,124,255,.18), 0 6px 14px rgba(10,124,255,.25);
+  }
+  .tile.selected.zh-tile { border-color: #8a5cf6; box-shadow: 0 0 0 4px rgba(138,92,246,.18), 0 6px 14px rgba(138,92,246,.25); }
+  .tile.shake { animation: shake .35s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+  }
+  .tile.gone {
+    animation: pop .4s forwards; pointer-events: none;
+  }
+  @keyframes pop {
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  .float-score {
+    position: fixed; font-size: 20px; font-weight: 800; color: #ff9d00;
+    pointer-events: none; z-index: 50; animation: floatup .8s forwards;
+  }
+  @keyframes floatup {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-40px); opacity: 0; }
+  }
+  #startScreen, #endScreen {
+    position: fixed; inset: 0; z-index: 100;
+    background: linear-gradient(160deg, #e8f4fd 0%, #f0eaff 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  #startScreen h2, #endScreen h2 { font-size: 26px; color: #1a3c6e; margin-bottom: 12px; }
+  #startScreen p, #endScreen p { font-size: 15px; color: #4a5a70; line-height: 1.8; max-width: 340px; }
+  .btn {
+    margin-top: 24px; border: none; cursor: pointer;
+    background: linear-gradient(135deg, #0a7cff, #8a5cf6);
+    color: #fff; font-size: 18px; font-weight: 700;
+    padding: 14px 48px; border-radius: 30px;
+    box-shadow: 0 6px 16px rgba(10,124,255,.35);
+    transition: transform .15s;
+  }
+  .btn:active { transform: scale(.95); }
+  .hidden { display: none !important; }
+  #endScreen .stats { margin-top: 10px; }
+  #endScreen .stats div { font-size: 16px; color: #1a3c6e; margin: 4px 0; }
+  #endScreen .stats b { color: #ff9d00; font-size: 20px; }
+  #progress {
+    width: 100%; max-width: 420px; height: 6px; border-radius: 3px;
+    background: rgba(26,60,110,.12); margin-bottom: 12px; overflow: hidden;
+  }
+  #progressBar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #0a7cff, #8a5cf6);
+    border-radius: 3px; transition: width .3s;
+  }
+  footer { margin-top: 14px; font-size: 11px; color: #9aa8bc; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ 单词消消乐</h1>
+  <p>新能源汽车英语 · 课堂词汇练习</p>
+</header>
+
+<div class="hud">
+  <div class="chip">⏱ <span id="time">0</span> 秒</div>
+  <div class="chip">⭐ 得分 <span id="score">0</span></div>
+  <div class="chip">🔥 连对 <span id="combo">0</span></div>
+</div>
+
+<div id="progress"><div id="progressBar"></div></div>
+
+<div id="grid"></div>
+
+<footer>点击一个英文单词，再点击它的中文释义即可消除</footer>
+
+<div id="startScreen">
+  <h2>⚡ 单词消消乐</h2>
+  <p>把英文单词和对应的中文释义配对消除。<br>连对越多，得分越高！<br>看看谁能最快通关 🚗</p>
+  <button class="btn" onclick="startGame()">开始挑战</button>
+</div>
+
+<div id="endScreen" class="hidden">
+  <h2>🎉 恭喜通关！</h2>
+  <div class="stats">
+    <div>总用时：<b id="endTime">0</b> 秒</div>
+    <div>总得分：<b id="endScore">0</b></div>
+    <div>最高连对：<b id="endCombo">0</b></div>
+  </div>
+  <p id="rankText" style="margin-top:10px;"></p>
+  <button class="btn" onclick="startGame()">再来一局</button>
+</div>
+
+<script>
+const PAIRS = [
+  { en: "spree", zh: "n. 狂欢，作乐" },
+  { en: "participant", zh: "n. 参与者，参加者" },
+  { en: "purchase", zh: "n. 购买，购买（的东西）" },
+  { en: "typical", zh: "adj. 独有的，特有的" },
+  { en: "calendar", zh: "n. 日历" },
+  { en: "at a discount", zh: "打折" }
+];
+
+let score = 0, combo = 0, maxCombo = 0, wrongCount = 0;
+let selected = null, locked = false;
+let timer = null, seconds = 0;
+let remaining = 0;
+
+// ===== 音效（Web Audio 实时合成，无需外部音频文件）=====
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+// 正确音效：清脆双音上扬 "叮-咚"
+function playCorrect() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [[660, 0], [990, 0.12]].forEach(([freq, delay]) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, now + delay);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.18);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now + delay);
+    osc.stop(now + delay + 0.2);
+  });
+}
+// 错误音效：低沉短促 "嗡" 下行
+function playWrong() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(220, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.32);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame() {
+  initAudio();   // 用户点击「开始」时激活音频，满足浏览器自动播放策略
+  score = 0; combo = 0; maxCombo = 0; wrongCount = 0;
+  selected = null; locked = false; seconds = 0;
+  document.getElementById("score").textContent = 0;
+  document.getElementById("combo").textContent = 0;
+  document.getElementById("time").textContent = 0;
+  document.getElementById("startScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.add("hidden");
+
+  clearInterval(timer);
+  timer = setInterval(() => {
+    seconds++;
+    document.getElementById("time").textContent = seconds;
+  }, 1000);
+
+  buildGrid();
+}
+
+function buildGrid() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const tiles = [];
+  PAIRS.forEach((p, i) => {
+    tiles.push({ id: i, type: "en", text: p.en });
+    tiles.push({ id: i, type: "zh", text: p.zh });
+  });
+  shuffle(tiles);
+  remaining = tiles.length;
+
+  tiles.forEach(t => {
+    const div = document.createElement("div");
+    div.className = "tile " + (t.type === "en" ? "en-tile" : "zh-tile");
+    div.dataset.id = t.id;
+    div.dataset.type = t.type;
+    div.innerHTML = '<span class="tag">' + (t.type === "en" ? "EN" : "中") + "</span>"
+      + '<div class="' + (t.type === "en" ? "en" : "zh") + '">' + t.text + "</div>";
+    div.addEventListener("click", () => onTileClick(div));
+    grid.appendChild(div);
+  });
+  updateProgress();
+}
+
+function onTileClick(tile) {
+  if (locked || tile.classList.contains("gone")) return;
+
+  if (tile === selected) {  // 点击已选中的再点一次 = 取消
+    tile.classList.remove("selected");
+    selected = null;
+    return;
+  }
+
+  if (!selected) {
+    selected = tile;
+    tile.classList.add("selected");
+    return;
+  }
+
+  // 已选了一个，判断配对
+  const isMatch = tile.dataset.id === selected.dataset.id
+               && tile.dataset.type !== selected.dataset.type;
+
+  if (isMatch) {
+    playCorrect();
+    combo++;
+    maxCombo = Math.max(maxCombo, combo);
+    const gain = 100 + (combo - 1) * 50;   // 连对加分
+    score += gain;
+    document.getElementById("score").textContent = score;
+    document.getElementById("combo").textContent = combo;
+    showFloatScore("+" + gain, tile);
+
+    const a = selected, b = tile;
+    a.classList.remove("selected");
+    selected = null;
+    a.classList.add("gone"); b.classList.add("gone");
+    remaining -= 2;
+    updateProgress();
+    if (remaining === 0) endGame();
+  } else {
+    playWrong();
+    wrongCount++;
+    combo = 0;
+    document.getElementById("combo").textContent = 0;
+    tile.classList.add("shake");
+    selected.classList.add("shake");
+    locked = true;
+    setTimeout(() => {
+      tile.classList.remove("shake");
+      selected.classList.remove("shake");
+      selected.classList.remove("selected");
+      selected = null;
+      locked = false;
+    }, 380);
+  }
+}
+
+function updateProgress() {
+  const total = PAIRS.length * 2;
+  document.getElementById("progressBar").style.width = ((total - remaining) / total * 100) + "%";
+}
+
+function showFloatScore(text, tile) {
+  const rect = tile.getBoundingClientRect();
+  const el = document.createElement("div");
+  el.className = "float-score";
+  el.textContent = text;
+  el.style.left = (rect.left + rect.width / 2 - 20) + "px";
+  el.style.top = (rect.top - 10) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+function endGame() {
+  clearInterval(timer);
+  document.getElementById("endTime").textContent = seconds;
+  document.getElementById("endScore").textContent = score;
+  document.getElementById("endCombo").textContent = maxCombo;
+  let rank = "继续加油，再来一局吧！💪";
+  if (seconds <= 30) rank = "单词达人！速度太惊人了 🚀";
+  else if (seconds <= 60) rank = "非常棒！词汇掌握得很扎实 👍";
+  else if (seconds <= 100) rank = "不错的成绩，再快一点点！";
+  document.getElementById("rankText").textContent = rank;
+  document.getElementById("endScreen").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
